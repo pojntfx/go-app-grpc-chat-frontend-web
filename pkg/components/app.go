@@ -6,6 +6,7 @@ import (
 
 	"github.com/maxence-charriere/go-app/v7/pkg/app"
 	proto "github.com/pojntfx/go-app-grpc-chat-frontend-web/pkg/proto/generated"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type App struct {
@@ -17,6 +18,22 @@ type App struct {
 
 func NewApp(client proto.ChatServiceClient) *App {
 	return &App{client: client, receivedMessages: []proto.ChatMessage{}, newMessageContent: ""}
+}
+
+func (c *App) HandleMessageSend(ctx app.Context, e app.Event) {
+	log.Println("Sending message with content", c.newMessageContent)
+
+	message := proto.ChatMessage{Content: c.newMessageContent}
+	outMessage, err := c.client.CreateMessage(context.TODO(), &message)
+	if err != nil {
+		log.Println("could not send message", err)
+	}
+
+	log.Println("Direct response from server:", outMessage)
+
+	c.newMessageContent = ""
+
+	c.Update()
 }
 
 func (c *App) Render() app.UI {
@@ -37,27 +54,33 @@ func (c *App) Render() app.UI {
 					c.newMessageContent = e.Get("target").Get("value").String()
 
 					c.Update()
-				}),
+				}).OnChange(c.HandleMessageSend),
 				app.Div().Class("input-group-append").Body(
-					app.Button().Class("btn btn-primary").Body(app.Text("Send Message")).OnClick(func(ctx app.Context, e app.Event) {
-						log.Println("Sending message with content", c.newMessageContent)
-
-						message := proto.ChatMessage{Content: c.newMessageContent}
-						outMessage, err := c.client.CreateMessage(context.TODO(), &message)
-						if err != nil {
-							log.Println("could not send message", err)
-						}
-
-						c.receivedMessages = append(c.receivedMessages, *outMessage)
-
-						log.Println("Received from server message", outMessage)
-
-						c.newMessageContent = ""
-
-						c.Update()
-					}),
+					app.Button().Class("btn btn-primary").Body(app.Text("Send Message")).OnClick(c.HandleMessageSend),
 				),
 			),
 		),
 	)
+}
+
+func (c *App) OnMount(ctx app.Context) {
+	pubsub, err := c.client.SubscribeToMessages(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		log.Println("could not subscribe to messages", pubsub)
+	}
+
+	go func() {
+		for {
+			message, err := pubsub.Recv()
+			if err != nil {
+				log.Println("could not receive messsage", err)
+			}
+
+			c.receivedMessages = append(c.receivedMessages, *message)
+
+			log.Printf("Pubsub received: %v\n", message)
+
+			c.Update()
+		}
+	}()
 }
