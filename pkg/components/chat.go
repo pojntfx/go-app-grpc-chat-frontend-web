@@ -27,7 +27,7 @@ func (c *ChatComponent) Render() app.UI {
 				)
 			}),
 		),
-		app.Div().Class("input-group mt-3").Body(
+		app.Div().Class("input-group my-3").Body(
 			app.Input().Type("text").Class("form-control").Value(c.newMessageContent).Placeholder("New message").OnInput(c.handleOnInput).OnChange(c.handleOnChange),
 			app.Div().Class("input-group-append").Body(
 				app.Button().Class("btn btn-primary").Body(app.Text("Send Message")).OnClick(c.handleOnChange),

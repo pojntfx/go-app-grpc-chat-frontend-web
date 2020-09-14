@@ -3,6 +3,7 @@ package components
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/maxence-charriere/go-app/v7/pkg/app"
 	proto "github.com/pojntfx/go-app-grpc-chat-frontend-web/pkg/proto/generated"
@@ -38,24 +39,34 @@ func (c *AppComponent) handleOnCreateMessage(message *proto.ChatMessage) {
 	}
 }
 
-func (c *AppComponent) OnMount(ctx app.Context) {
+func (c *AppComponent) open() error {
 	stream, err := c.client.TransceiveMessages(context.Background())
 	if err != nil {
-		log.Println("could not subscribe to messages", stream)
+		return err
 	}
 
 	c.stream = stream
 
+	for {
+		message, err := c.stream.Recv()
+		if err != nil {
+			return err
+		}
+
+		c.chatMessageChan <- message
+
+		c.Update()
+	}
+}
+
+func (c *AppComponent) OnMount(ctx app.Context) {
 	go func() {
 		for {
-			message, err := c.stream.Recv()
-			if err != nil {
-				log.Println("could not receive messsage", err)
+			if err := c.open(); err != nil {
+				log.Println("could not open component, reconnecting in one second", err)
 			}
 
-			c.chatMessageChan <- message
-
-			c.Update()
+			time.Sleep(time.Second)
 		}
 	}()
 }
