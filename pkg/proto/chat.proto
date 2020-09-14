@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package com.pojtinger.felicitas.goAppGrpcChat;
+
+option go_package = "github.com/pojntfx/go-app-grpc-chat-frontend-web/pkg/proto";
+
+service ChatService { rpc CreateMessage(ChatMessage) returns (ChatMessage); }
+
+message ChatMessage { string Content = 1; }

@@ -1,0 +1,2 @@
+*.wasm
+/go-app-grpc-chat-frontend-web-server
