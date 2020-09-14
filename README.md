@@ -6,7 +6,7 @@ Web frontend for an example chat application using the `go-app` package and gRPC
 
 ## Overview
 
-`go-app-grpc-chat-frontend-web` is a short example showing the use of the [go-app](https://github.com/maxence-charriere/go-app) package and [gRPC](https://grpc.io/) in a Progressive Web Application.
+`go-app-grpc-chat-frontend-web` is a short example showing the use of the [go-app](https://github.com/maxence-charriere/go-app) package and [gRPC](https://grpc.io/) in a Progressive Web Application. There is full bi-directional streaming support and automatic reconnection has been set up.
 
 ## Installation
 
