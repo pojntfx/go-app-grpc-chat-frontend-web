@@ -9,6 +9,7 @@ import "google/protobuf/empty.proto";
 service ChatService {
   rpc CreateMessage(ChatMessage) returns (ChatMessage);
   rpc SubscribeToMessages(google.protobuf.Empty) returns (stream ChatMessage);
+  rpc TransceiveMessages(stream ChatMessage) returns (stream ChatMessage);
 }
 
 message ChatMessage { string Content = 1; }

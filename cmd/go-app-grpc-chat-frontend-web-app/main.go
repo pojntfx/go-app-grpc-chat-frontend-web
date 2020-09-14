@@ -20,7 +20,7 @@ func main() {
 	defer conn.Close()
 	chatClient := proto.NewChatServiceClient(conn)
 
-	appComponent := components.NewApp(chatClient)
+	appComponent := components.NewAppComponent(chatClient)
 
 	app.Route("/", appComponent)
 
